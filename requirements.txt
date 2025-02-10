@@ -2,3 +2,6 @@ streamlit
 deepface
 Pillow
 opencv-python-headless
+streamlit==1.26.0
+deepface==0.0.79
+tf-keras
