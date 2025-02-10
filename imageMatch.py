@@ -25,9 +25,9 @@ def compare_images(uploaded_image, image1, image2):
     
     # Determine which image the uploaded image is closest to
     if ssim_image1 > ssim_image2:
-        return f"Image 1 is the closest match with a similarity of {match_image1:.2f}%", match_image1
+        return f"Image 1 is the closest match with a similarity of {match_image1:.2f}%", match_image1, "Image 1"
     else:
-        return f"Image 2 is the closest match with a similarity of {match_image2:.2f}%", match_image2
+        return f"Image 2 is the closest match with a similarity of {match_image2:.2f}%", match_image2, "Image 2"
 
 # Streamlit UI
 st.title('Image Similarity Checker')
@@ -49,11 +49,21 @@ if uploaded_file is not None and image1 and image2:
     
     # Display uploaded image
     st.image(uploaded_image, caption='Uploaded Image', use_column_width=True)
-    
+
+    # Display predefined images (image1 and image2)
+    st.image(image1, caption="Image 1", use_column_width=True)
+    st.image(image2, caption="Image 2", use_column_width=True)
+
     # Compare the uploaded image with image1 and image2
-    result, match_percentage = compare_images(uploaded_image, image1, image2)
+    result, match_percentage, closest_image = compare_images(uploaded_image, image1, image2)
     
     # Display the result
     st.write(result)
     st.write(f"SSIM Score for Image 1: {match_percentage:.2f}%")
     st.write(f"SSIM Score for Image 2: {100 - match_percentage:.2f}%")
+
+    # Highlight the closest match
+    if closest_image == "Image 1":
+        st.markdown(f"**The uploaded image is closer to Image 1!**")
+    else:
+        st.markdown(f"**The uploaded image is closer to Image 2!**")
