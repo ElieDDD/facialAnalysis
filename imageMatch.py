@@ -1,28 +1,24 @@
 import streamlit as st
-import cv2
+from PIL import Image
 import numpy as np
 
 def calculate_mse(image1, image2):
     # Calculate the Mean Squared Error between two images
-    err = np.sum((image1.astype("float") - image2.astype("float")) ** 2)
-    err /= float(image1.shape[0] * image1.shape[1])
+    err = np.sum((np.array(image1).astype("float") - np.array(image2).astype("float")) ** 2)
+    err /= float(image1.size[0] * image1.size[1])
     return err
 
 def main():
     st.title("Image Comparison App")
     
     # Load the two predefined images
-    image1 = cv2.imread("image1.jpg")
-    image2 = cv2.imread("image2.jpg")
+    image1 = Image.open("image1.jpg")
+    image2 = Image.open("image2.jpg")
     
     # Ensure the images are loaded correctly
     if image1 is None or image2 is None:
         st.error("Failed to load one or both of the predefined images.")
         return
-    
-    # Convert images to RGB (OpenCV loads images in BGR)
-    image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2RGB)
-    image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
     
     # Display the predefined images
     st.write("Predefined Images:")
@@ -36,21 +32,19 @@ def main():
     uploaded_file = st.file_uploader("Upload an image to compare:", type=["jpg", "jpeg", "png"])
     
     if uploaded_file is not None:
-        # Convert the uploaded file to an OpenCV image
-        file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-        uploaded_image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-        uploaded_image = cv2.cvtColor(uploaded_image, cv2.COLOR_BGR2RGB)
+        # Convert the uploaded file to a PIL image
+        uploaded_image = Image.open(uploaded_file)
         
         # Display the uploaded image
         st.image(uploaded_image, caption="Uploaded Image", use_column_width=True)
         
         # Resize images to the same dimensions for comparison
-        target_size = (min(image1.shape[1], image2.shape[1], uploaded_image.shape[1]),
-                       min(image1.shape[0], image2.shape[0], uploaded_image.shape[0]))
+        target_size = (min(image1.size[0], image2.size[0], uploaded_image.size[0]),
+                       min(image1.size[1], image2.size[1], uploaded_image.size[1]))
         
-        image1_resized = cv2.resize(image1, target_size)
-        image2_resized = cv2.resize(image2, target_size)
-        uploaded_image_resized = cv2.resize(uploaded_image, target_size)
+        image1_resized = image1.resize(target_size)
+        image2_resized = image2.resize(target_size)
+        uploaded_image_resized = uploaded_image.resize(target_size)
         
         # Calculate MSE between the uploaded image and the two predefined images
         mse1 = calculate_mse(uploaded_image_resized, image1_resized)
